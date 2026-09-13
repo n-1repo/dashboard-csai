@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+:root {
+  --radius: 0.5rem;
+
+  --background: #0b141a;
+  --foreground: #e9edef;
+
+  --panel: #111b21;
+  --panel-raised: #202c33;
+  --panel-hover: #2a3942;
+
+  --card: #202c33;
+  --card-foreground: #e9edef;
+  --popover: #233138;
+  --popover-foreground: #e9edef;
+
+  --primary: #00a884;
+  --primary-foreground: #062019;
+
+  --secondary: #202c33;
+  --secondary-foreground: #e9edef;
+
+  --muted: #202c33;
+  --muted-foreground: #8696a0;
+
+  --accent: #2a3942;
+  --accent-foreground: #e9edef;
+
+  --destructive: #f15c6d;
+  --destructive-foreground: #ffffff;
+
+  --border: rgba(134, 150, 160, 0.15);
+  --input: rgba(134, 150, 160, 0.15);
+  --ring: #00a884;
+
+  --bubble-in: #202c33;
+  --bubble-out: #005c4b;
+  --bubble-in-foreground: #e9edef;
+  --bubble-out-foreground: #e9edef;
+  --bubble-meta: #8696a0;
+  --bubble-meta-out: rgba(255, 255, 255, 0.6);
+
+  --status-sent: #8696a0;
+  --status-delivered: #8696a0;
+  --status-read: #53bdeb;
+  --status-failed: #f15c6d;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-panel: var(--panel);
+  --color-panel-raised: var(--panel-raised);
+  --color-panel-hover: var(--panel-hover);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-bubble-in: var(--bubble-in);
+  --color-bubble-out: var(--bubble-out);
+  --color-bubble-in-foreground: var(--bubble-in-foreground);
+  --color-bubble-out-foreground: var(--bubble-out-foreground);
+  --color-bubble-meta: var(--bubble-meta);
+  --color-bubble-meta-out: var(--bubble-meta-out);
+
+  --color-status-sent: var(--status-sent);
+  --color-status-delivered: var(--status-delivered);
+  --color-status-read: var(--status-read);
+  --color-status-failed: var(--status-failed);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(134, 150, 160, 0.25);
+  border-radius: 9999px;
+}
