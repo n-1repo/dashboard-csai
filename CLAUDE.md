@@ -1,5 +1,9 @@
 # WA Cloud Logger
 
+Follow the `lean-dev` skill for how to think, scope, change and verify code.
+This file holds only what is specific to this project or stricter than the
+skill.
+
 Next.js (App Router) + TypeScript + Tailwind + Supabase + Meta WhatsApp
 Cloud API dashboard. Read `docs/ARCHITECTURE.md`, `docs/DATABASE.md`,
 `docs/WEBHOOK.md` and `docs/IMPLEMENTATION_SPEC.md` before making non-trivial
