@@ -30,7 +30,7 @@ export function ChatWindow({ conversation, onBack }: ChatWindowProps) {
   }, [conversation.id, conversation.unread_count, messages.length, markConversationRead]);
 
   return (
-    <div className="flex h-full flex-1 flex-col">
+    <div className="flex h-full flex-1 flex-col motion-safe:animate-panel-in">
       <ChatHeader
         conversation={{ ...conversation, contact }}
         onOpenContactPanel={() => setPanelOpen(true)}

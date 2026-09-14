@@ -15,7 +15,11 @@ function SheetOverlay({
   return (
     <DialogPrimitive.Overlay
       data-slot="sheet-overlay"
-      className={cn("fixed inset-0 z-50 bg-black/60", className)}
+      className={cn(
+        "fixed inset-0 z-50 bg-black/60",
+        "motion-safe:data-[state=open]:animate-overlay-in motion-safe:data-[state=closed]:animate-overlay-out",
+        className,
+      )}
       {...props}
     />
   );
@@ -37,6 +41,9 @@ function SheetContent({
         className={cn(
           "fixed inset-y-0 z-50 flex w-full flex-col border-border bg-panel p-0 text-foreground shadow-xl outline-none sm:max-w-sm",
           side === "right" ? "right-0 border-l" : "left-0 border-r",
+          side === "right"
+            ? "motion-safe:data-[state=open]:animate-sheet-in-right motion-safe:data-[state=closed]:animate-sheet-out-right"
+            : "motion-safe:data-[state=open]:animate-sheet-in-left motion-safe:data-[state=closed]:animate-sheet-out-left",
           className,
         )}
         {...props}

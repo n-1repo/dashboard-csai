@@ -78,7 +78,7 @@ export function MessageBubble({ message }: { message: Message }) {
   });
 
   return (
-    <div className={cn("flex", isOutbound ? "justify-end" : "justify-start")}>
+    <div className={cn("flex motion-safe:animate-bubble-in", isOutbound ? "justify-end" : "justify-start")}>
       <div
         className={cn(
           "flex max-w-[75%] flex-col gap-1 rounded-lg px-2 py-1.5 text-sm shadow-sm",
