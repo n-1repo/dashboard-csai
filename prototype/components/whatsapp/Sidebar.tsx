@@ -57,12 +57,13 @@ export function Sidebar({ operator, unreadTotal = 0, followUpCount = 0, onOpenFo
             <Link
               key={item.href}
               href={item.href}
+              aria-label={item.label}
               className={cn(
-                "relative flex size-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground",
+                "relative flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground",
                 isActive && "bg-primary/10 text-primary",
               )}
             >
-              <Icon className="size-5" />
+              <Icon className="size-5" aria-hidden="true" />
               {item.href === "/dashboard" && unreadTotal > 0 ? (
                 <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
                   {unreadTotal > 9 ? "9+" : unreadTotal}
@@ -76,9 +77,10 @@ export function Sidebar({ operator, unreadTotal = 0, followUpCount = 0, onOpenFo
           <button
             type="button"
             onClick={onOpenFollowUps}
-            className="relative flex size-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+            aria-label="Follow-ups"
+            className="relative flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
           >
-            <AlarmClock className="size-5" />
+            <AlarmClock className="size-5" aria-hidden="true" />
             {followUpCount > 0 ? (
               <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-status-expiring text-[10px] font-semibold text-background">
                 {followUpCount > 9 ? "9+" : followUpCount}
@@ -91,17 +93,18 @@ export function Sidebar({ operator, unreadTotal = 0, followUpCount = 0, onOpenFo
       <div className="flex flex-col items-center gap-2">
         <Link
           href="/dashboard/settings"
+          aria-label="Settings"
           className={cn(
-            "flex size-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground",
+            "flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground",
             pathname === "/dashboard/settings" && "bg-primary/10 text-primary",
           )}
         >
-          <Settings className="size-5" />
+          <Settings className="size-5" aria-hidden="true" />
         </Link>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full p-0">
+            <Button variant="ghost" size="icon" className="rounded-full p-0" aria-label="Account menu">
               <Avatar className="size-9">
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>

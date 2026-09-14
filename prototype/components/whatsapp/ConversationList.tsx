@@ -58,16 +58,20 @@ export function ConversationList({ conversations, loading, error, selectedId, on
     <div className="flex h-full w-full flex-col border-r border-border bg-panel lg:w-96">
       <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-xl font-semibold text-foreground">Chats</h1>
-        <SquarePen className="size-5 text-muted-foreground" />
+        <SquarePen className="size-5 text-muted-foreground" aria-hidden="true" />
       </div>
 
       <div className="px-3 pb-2">
         <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search conversations"
+            aria-label="Search conversations"
             className="pl-9"
           />
         </div>

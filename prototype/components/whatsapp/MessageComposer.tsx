@@ -55,10 +55,24 @@ export function MessageComposer({ conversationId, windowStatus }: MessageCompose
         </div>
       ) : null}
       <div className="flex items-end gap-2">
-        <Button variant="icon" size="icon" type="button" disabled>
+        <Button
+          variant="icon"
+          size="icon"
+          type="button"
+          disabled
+          aria-label="Attach file"
+          title="Attach file (coming soon)"
+        >
           <Paperclip className="size-5" />
         </Button>
-        <Button variant="icon" size="icon" type="button" disabled>
+        <Button
+          variant="icon"
+          size="icon"
+          type="button"
+          disabled
+          aria-label="Emoji picker"
+          title="Emoji picker (coming soon)"
+        >
           <Smile className="size-5" />
         </Button>
 
@@ -73,11 +87,18 @@ export function MessageComposer({ conversationId, windowStatus }: MessageCompose
         />
 
         {text.trim() ? (
-          <Button size="icon" type="button" onClick={handleSend}>
+          <Button size="icon" type="button" onClick={handleSend} aria-label="Send message">
             <Send className="size-4" />
           </Button>
         ) : (
-          <Button variant="icon" size="icon" type="button" disabled>
+          <Button
+            variant="icon"
+            size="icon"
+            type="button"
+            disabled
+            aria-label="Voice message"
+            title="Voice message (coming soon)"
+          >
             <Mic className="size-5" />
           </Button>
         )}

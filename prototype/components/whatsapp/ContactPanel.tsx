@@ -11,13 +11,14 @@ import { ContactEditor } from "@/components/contacts/ContactEditor";
 import { getInitials } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { useWindowStatus } from "@/hooks/useWindowStatus";
+import { WindowStatusIcon } from "@/components/whatsapp/WindowStatusIcon";
 import type { Contact, Conversation } from "@/types/database";
 
 const WINDOW_STATUS_LABEL: Record<"NONE" | "ACTIVE" | "EXPIRING" | "EXPIRED", string> = {
   NONE: "-",
-  ACTIVE: "🟢 Active",
-  EXPIRING: "🟡 Expiring",
-  EXPIRED: "🔴 Expired",
+  ACTIVE: "Active",
+  EXPIRING: "Expiring",
+  EXPIRED: "Expired",
 };
 
 const STATUS_OPTIONS: Conversation["status"][] = ["OPEN", "PENDING", "RESOLVED", "ARCHIVED"];
@@ -101,7 +102,8 @@ export function ContactPanel({ open, onOpenChange, contact, conversation, onCont
 
               <div>
                 <div className="text-xs text-muted-foreground">Customer window status</div>
-                <div className="text-sm text-foreground">
+                <div className="flex items-center gap-1.5 text-sm text-foreground">
+                  {windowStatus !== "NONE" ? <WindowStatusIcon status={windowStatus} /> : null}
                   {WINDOW_STATUS_LABEL[windowStatus]}
                   {windowStatus === "ACTIVE" || windowStatus === "EXPIRING" ? ` · ${remainingLabel} remaining` : ""}
                 </div>

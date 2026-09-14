@@ -2,8 +2,10 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import { getInitials } from "@/lib/format";
 import { useWindowStatus } from "@/hooks/useWindowStatus";
+import { WindowStatusIcon } from "@/components/whatsapp/WindowStatusIcon";
 import type { ConversationWithContact } from "@/types/database";
 
 interface FollowUpCenterProps {
@@ -33,8 +35,14 @@ function FollowUpItem({
         <AvatarFallback>{getInitials(name)}</AvatarFallback>
       </Avatar>
       <span className="min-w-0 flex-1 truncate font-medium text-foreground">{name}</span>
-      <span className="shrink-0 text-sm text-status-expiring">
-        {status === "EXPIRED" ? "🔴 Expired" : `🟡 ${remainingLabel}`}
+      <span
+        className={cn(
+          "flex shrink-0 items-center gap-1 text-sm",
+          status === "EXPIRED" ? "text-status-failed" : "text-status-expiring",
+        )}
+      >
+        <WindowStatusIcon status={status === "EXPIRED" ? "EXPIRED" : "EXPIRING"} />
+        {status === "EXPIRED" ? "Expired" : remainingLabel}
       </span>
     </button>
   );

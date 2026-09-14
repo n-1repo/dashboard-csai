@@ -27,7 +27,7 @@
   --accent: #2a3942;
   --accent-foreground: #e9edef;
 
-  --destructive: #f15c6d;
+  --destructive: #f36e7d;
   --destructive-foreground: #ffffff;
 
   --border: rgba(134, 150, 160, 0.15);
@@ -44,7 +44,7 @@
   --status-sent: #8696a0;
   --status-delivered: #8696a0;
   --status-read: #53bdeb;
-  --status-failed: #f15c6d;
+  --status-failed: #f36e7d;
   --status-expiring: #eab308;
 }
 

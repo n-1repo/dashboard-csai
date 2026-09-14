@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { formatTimestamp, getInitials, messagePreview } from "@/lib/format";
 import { useWindowStatus } from "@/hooks/useWindowStatus";
+import { WindowStatusIcon } from "@/components/whatsapp/WindowStatusIcon";
 import type { ConversationWithContact } from "@/types/database";
 
 interface ConversationItemProps {
@@ -49,11 +50,12 @@ export function ConversationItem({ conversation, active, onSelect }: Conversatio
         {windowStatus === "EXPIRING" || windowStatus === "EXPIRED" ? (
           <div
             className={cn(
-              "mt-0.5 text-xs",
+              "mt-0.5 flex items-center gap-1 text-xs",
               windowStatus === "EXPIRING" ? "text-status-expiring" : "text-status-failed",
             )}
           >
-            {windowStatus === "EXPIRING" ? `🟡 ${remainingLabel}` : "🔴 Expired"}
+            <WindowStatusIcon status={windowStatus} />
+            {windowStatus === "EXPIRING" ? remainingLabel : "Expired"}
           </div>
         ) : null}
       </div>
