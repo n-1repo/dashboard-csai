@@ -1,4 +1,4 @@
-import type { MessageStatus, MessageType } from "@/types/database";
+import type { MessageDirection, MessageStatus, MessageType } from "@/types/database";
 import type { MetaMessage } from "@/types/whatsapp";
 
 const MEDIA_TYPES = ["image", "video", "audio", "document", "sticker"] as const;
@@ -78,6 +78,10 @@ export function extractMessageContent(message: MetaMessage): ParsedMessageConten
   }
 
   return { messageType, body: null, mediaId: null, mediaMimeType: null, caption: null };
+}
+
+export function shouldResetCustomerWindow(direction: MessageDirection, isNewMessage: boolean) {
+  return direction === "INBOUND" && isNewMessage;
 }
 
 export function mapMetaStatus(status: string): MessageStatus {

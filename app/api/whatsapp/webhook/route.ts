@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { isValidMetaSignature } from "@/lib/whatsapp/signature";
-import { extractMessageContent, mapMetaStatus } from "@/lib/whatsapp/webhook-parser";
+import { extractMessageContent, mapMetaStatus, shouldResetCustomerWindow } from "@/lib/whatsapp/webhook-parser";
 import { shouldApplyStatus } from "@/lib/whatsapp/status-rank";
 import { logMessageEvent } from "@/lib/whatsapp/events";
 import { findOrCreateContact } from "@/lib/contacts/service";
@@ -128,7 +128,7 @@ async function processInboundMessage(
     payload: message,
   });
 
-  if (isNewMessage && messageId) {
+  if (shouldResetCustomerWindow("INBOUND", isNewMessage) && messageId) {
     await logMessageEvent(supabase, { messageId, eventType: "MESSAGE_CREATED" });
     await touchConversationOnInbound(supabase, conversation.id, messageId, new Date(Number(message.timestamp) * 1000).toISOString());
   }

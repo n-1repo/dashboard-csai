@@ -3,8 +3,10 @@
 Internal dashboard that logs Meta WhatsApp Cloud API conversations into
 Supabase and exposes them through a WhatsApp-Web-style operator interface:
 conversation logger, chat history viewer, contact management, message status
-tracker, and a realtime inbox. It is the base layer for a future AI Customer
-Service / CRM integration — no AI is implemented yet.
+tracker, a realtime inbox, and a WhatsApp 24-hour customer messaging window
+tracker (live status, expiry warnings, a follow-up list). It is the base
+layer for a future AI Customer Service / CRM integration — no AI is
+implemented yet.
 
 ## Architecture
 
@@ -108,3 +110,7 @@ See `prototype/README.md` for details.
 - **0.1.1** — Added CI workflow to run `npm run build` on push/PR.
 - **0.2.0** — Added a static prototype (`prototype/`) deployable to GitHub
   Pages, with its own GitHub Actions workflow.
+- **0.3.0** — Added the WhatsApp 24-hour customer messaging window: live
+  status on the conversation list, chat header, contact panel and composer,
+  plus a Follow-ups panel for conversations about to expire. See
+  `docs/ARCHITECTURE.md` and `docs/DATABASE.md`.

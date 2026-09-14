@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { MessageSquare, Settings, Users, LogOut } from "lucide-react";
+import { AlarmClock, MessageSquare, Settings, Users, LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -18,6 +18,8 @@ import type { OperatorSession } from "@/hooks/useRealtimeAuth";
 interface SidebarProps {
   operator: OperatorSession | null;
   unreadTotal?: number;
+  followUpCount?: number;
+  onOpenFollowUps?: () => void;
 }
 
 const NAV_ITEMS = [
@@ -25,7 +27,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/contacts", label: "Contacts", icon: Users },
 ];
 
-export function Sidebar({ operator, unreadTotal = 0 }: SidebarProps) {
+export function Sidebar({ operator, unreadTotal = 0, followUpCount = 0, onOpenFollowUps }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -68,6 +70,21 @@ export function Sidebar({ operator, unreadTotal = 0 }: SidebarProps) {
             </Link>
           );
         })}
+
+        {onOpenFollowUps ? (
+          <button
+            type="button"
+            onClick={onOpenFollowUps}
+            className="relative flex size-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+          >
+            <AlarmClock className="size-5" />
+            {followUpCount > 0 ? (
+              <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-status-expiring text-[10px] font-semibold text-background">
+                {followUpCount > 9 ? "9+" : followUpCount}
+              </span>
+            ) : null}
+          </button>
+        ) : null}
       </div>
 
       <div className="flex flex-col items-center gap-2">

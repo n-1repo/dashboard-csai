@@ -52,6 +52,19 @@ duplicate) against the resolved message id, so the audit trail
 (`message_events`) shows every webhook Meta actually sent, while the
 `messages` table itself never gains a duplicate row.
 
+## Customer messaging window reset
+
+Every genuinely new inbound message also resets the 24-hour customer
+messaging window: `lib/whatsapp/webhook-parser.ts`'s
+`shouldResetCustomerWindow("INBOUND", isNewMessage)` gates the same call to
+`touchConversationOnInbound` (the `increment_conversation_unread` RPC) that
+already only fires when the upsert above was a genuine insert — so a
+redelivered webhook (duplicate `meta_message_id`) can never reset the
+window, only a message that was actually new. Outbound messages never go
+through this webhook at all (they're created by `/api/whatsapp/send`), so
+they structurally can't touch the window either. See
+`docs/ARCHITECTURE.md` for the full customer-window design.
+
 ## Status updates
 
 A `statuses` entry (`sent | delivered | read | failed`) is matched to its

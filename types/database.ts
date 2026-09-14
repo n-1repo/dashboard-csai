@@ -25,7 +25,9 @@ export type MessageEventType =
   | "MESSAGE_READ"
   | "MESSAGE_FAILED"
   | "CONTACT_CREATED"
-  | "CONTACT_UPDATED";
+  | "CONTACT_UPDATED"
+  | "CUSTOMER_WINDOW_STARTED"
+  | "CUSTOMER_WINDOW_RESET";
 
 export type Operator = {
   id: string;
@@ -69,6 +71,8 @@ export type Conversation = {
   status: ConversationStatus;
   last_message_id: string | null;
   last_message_at: string | null;
+  last_customer_message_at: string | null;
+  customer_window_expires_at: string | null;
   unread_count: number;
   assigned_to: string | null;
   created_at: string;
@@ -131,8 +135,9 @@ export type Database = {
       };
       conversations: {
         Row: Conversation;
-        Insert: Partial<Conversation> & Pick<Conversation, "contact_id" | "wa_account_id">;
-        Update: Partial<Conversation>;
+        Insert: Partial<Omit<Conversation, "customer_window_expires_at">> &
+          Pick<Conversation, "contact_id" | "wa_account_id">;
+        Update: Partial<Omit<Conversation, "customer_window_expires_at">>;
         Relationships: [
           {
             foreignKeyName: "conversations_contact_id_fkey";

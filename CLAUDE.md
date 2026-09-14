@@ -27,6 +27,10 @@ idempotency, and known scope cuts.
   by anything under `components/` or any client component.
 - `npm run lint`, `npx tsc --noEmit`, `npm run build`, `npm test` should all
   pass before considering a change done.
+- Customer window status (`NONE`/`ACTIVE`/`EXPIRING`/`EXPIRED`) is always
+  computed from `conversations.customer_window_expires_at` at read time
+  (`lib/whatsapp/window-status.ts`) — never stored as a column, never
+  written by a background job. Don't add one; extend `getWindowStatus`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

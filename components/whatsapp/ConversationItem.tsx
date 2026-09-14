@@ -3,6 +3,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { formatTimestamp, getInitials, messagePreview } from "@/lib/format";
+import { useWindowStatus } from "@/hooks/useWindowStatus";
 import type { ConversationWithContact } from "@/types/database";
 
 interface ConversationItemProps {
@@ -13,6 +14,7 @@ interface ConversationItemProps {
 
 export function ConversationItem({ conversation, active, onSelect }: ConversationItemProps) {
   const name = conversation.contact.display_name || conversation.contact.profile_name || conversation.contact.phone_number;
+  const { status: windowStatus, remainingLabel } = useWindowStatus(conversation.customer_window_expires_at);
 
   return (
     <button
@@ -44,6 +46,16 @@ export function ConversationItem({ conversation, active, onSelect }: Conversatio
             </span>
           ) : null}
         </div>
+        {windowStatus === "EXPIRING" || windowStatus === "EXPIRED" ? (
+          <div
+            className={cn(
+              "mt-0.5 text-xs",
+              windowStatus === "EXPIRING" ? "text-status-expiring" : "text-status-failed",
+            )}
+          >
+            {windowStatus === "EXPIRING" ? `🟡 ${remainingLabel}` : "🔴 Expired"}
+          </div>
+        ) : null}
       </div>
     </button>
   );

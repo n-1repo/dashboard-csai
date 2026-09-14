@@ -62,6 +62,35 @@ right Graph API payload, a `MessageComposer` UI affordance, and the same
 already used for text — don't skip that part, it's the thing that satisfies
 "send request succeeding is not the same as delivered".
 
+## Customer messaging window (read this before touching it)
+
+`conversations.last_customer_message_at` (plain column, set only by the RPC
+in `supabase/migrations/0006_customer_window_rpc.sql`) and
+`customer_window_expires_at` (generated, `+ 24h`, never set directly) are
+the only stored state. Status (`NONE | ACTIVE | EXPIRING | EXPIRED`) is
+always computed from `customer_window_expires_at` vs. now —
+`lib/whatsapp/window-status.ts`'s `getWindowStatus` — never stored, and the
+4-hour "expiring soon" threshold lives in that one file
+(`WINDOW_EXPIRING_THRESHOLD_MS`). `hooks/useWindowStatus.ts` re-ticks this
+every 30s for the UI; nothing else polls.
+
+There is no reminder table and no cron job. The Follow-ups panel
+(`components/whatsapp/FollowUpCenter.tsx`) filters the same `conversations`
+array `hooks/useConversations` already holds (status `OPEN` and
+`getWindowStatus(...) === "EXPIRING"`), so it updates from the existing
+Realtime subscription for free. If you're asked to add "acknowledge /
+dismiss so it disappears from the list before it expires" — that's new
+state that needs its own table; don't try to fake it by mutating
+`conversations`.
+
+The reset rule (only a genuinely new inbound message moves
+`last_customer_message_at`) is enforced by
+`lib/whatsapp/webhook-parser.ts`'s `shouldResetCustomerWindow(direction,
+isNewMessage)`, gating the exact same call site that already gated
+`increment_conversation_unread` on `isNewMessage`. If you add a new way to
+create an inbound message (a different webhook field, a backfill script),
+route it through that same predicate — don't reimplement the gate.
+
 ## Where AI CS plugs in later
 
 Per `docs/ARCHITECTURE.md`, an AI layer is just another reader/writer of
@@ -85,3 +114,7 @@ a second way to write `messages` rows.
   (fine at MVP scale); the API shapes (`/api/conversations`,
   `/api/contacts?q=`) are ready to grow into server-side pagination/search
   without changing their response shape.
+- No acknowledge/dismiss for the Follow-ups panel (an operator can't mark a
+  conversation "handled" to hide it before the window actually expires) —
+  that's a product decision, not built until there's a concrete need for
+  it, and needs its own state table when it is.

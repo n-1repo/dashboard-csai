@@ -12,11 +12,11 @@ insert into contacts (id, phone_number, display_name, profile_name, notes, tags)
   ('00000000-0000-0000-0000-000000000103', '+6281100000103', 'Budi Santoso', 'Budi', null, '["reseller"]'),
   ('00000000-0000-0000-0000-000000000104', '+6281100000104', 'Nadia Kusuma', 'Nadia', null, '[]');
 
-insert into conversations (id, contact_id, wa_account_id, status, unread_count, last_message_at) values
-  ('00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000010', 'OPEN', 2, now() - interval '5 minutes'),
-  ('00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000102', '00000000-0000-0000-0000-000000000010', 'RESOLVED', 0, now() - interval '2 days'),
-  ('00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000103', '00000000-0000-0000-0000-000000000010', 'OPEN', 0, now() - interval '1 hour'),
-  ('00000000-0000-0000-0000-000000000204', '00000000-0000-0000-0000-000000000104', '00000000-0000-0000-0000-000000000010', 'PENDING', 1, now() - interval '10 minutes');
+insert into conversations (id, contact_id, wa_account_id, status, unread_count, last_message_at, last_customer_message_at) values
+  ('00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000010', 'OPEN', 2, now() - interval '5 minutes', now() - interval '5 minutes'),
+  ('00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000102', '00000000-0000-0000-0000-000000000010', 'RESOLVED', 0, now() - interval '2 days', now() - interval '2 days' - interval '2 minutes'),
+  ('00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000103', '00000000-0000-0000-0000-000000000010', 'OPEN', 0, now() - interval '1 hour', now() - interval '20 hours 30 minutes'),
+  ('00000000-0000-0000-0000-000000000204', '00000000-0000-0000-0000-000000000104', '00000000-0000-0000-0000-000000000010', 'PENDING', 1, now() - interval '10 minutes', now() - interval '10 minutes');
 
 insert into messages (id, conversation_id, meta_message_id, direction, message_type, body, status, sender_phone, recipient_phone, "timestamp") values
   ('00000000-0000-0000-0000-000000000301', '00000000-0000-0000-0000-000000000201', 'seed-msg-301', 'INBOUND', 'TEXT', 'Halo, akun saya kena blokir', 'RECEIVED', '+6281100000101', '+10000000000', now() - interval '10 minutes'),

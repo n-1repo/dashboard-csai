@@ -1,20 +1,36 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Mic, Paperclip, Send, Smile } from "lucide-react";
+import { AlertTriangle, Mic, Paperclip, Send, Smile } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import type { WindowStatus } from "@/lib/whatsapp/window-status";
 
 interface MessageComposerProps {
   conversationId: string;
+  windowStatus: WindowStatus;
 }
 
-export function MessageComposer({ conversationId }: MessageComposerProps) {
+export function MessageComposer({ conversationId, windowStatus }: MessageComposerProps) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  if (windowStatus === "EXPIRED") {
+    return (
+      <div className="border-t border-border bg-panel-raised p-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-sm font-medium text-status-failed">
+          <AlertTriangle className="size-4" />
+          Customer messaging window has expired.
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Use an approved template to continue the conversation.
+        </p>
+      </div>
+    );
+  }
 
   async function handleSend() {
     const trimmed = text.trim();
@@ -49,6 +65,11 @@ export function MessageComposer({ conversationId }: MessageComposerProps) {
 
   return (
     <div className="border-t border-border bg-panel-raised p-3">
+      {windowStatus === "EXPIRING" ? (
+        <div className="mb-2 text-xs text-status-expiring">
+          Customer window closing soon — reply now or switch to a template after it expires.
+        </div>
+      ) : null}
       {error ? <div className="mb-2 text-xs text-destructive">{error}</div> : null}
       <div className="flex items-end gap-2">
         <Button variant="icon" size="icon" type="button" disabled>

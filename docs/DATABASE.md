@@ -7,6 +7,15 @@ Schema lives in `supabase/migrations/`, applied in filename order:
 - `0003_functions.sql` — `increment_conversation_unread`, used by the webhook
   to atomically bump `conversations.unread_count` / `last_message_id` /
   `last_message_at` on an inbound message.
+- `0004_customer_window_schema.sql` — adds `conversations.last_customer_message_at`
+  and the generated `customer_window_expires_at` column, plus a partial index.
+- `0005_customer_window_events_enum.sql` — adds `CUSTOMER_WINDOW_STARTED` /
+  `CUSTOMER_WINDOW_RESET` to `message_event_type` (kept in its own migration:
+  Postgres won't let a newly added enum value be used in the same
+  transaction it was added in).
+- `0006_customer_window_rpc.sql` — extends `increment_conversation_unread`
+  (`create or replace`, same function) to also set
+  `last_customer_message_at` and log the matching window event.
 
 `supabase/seed.sql` is development-only sample data (contacts, conversations
 in different states, a failed outbound message, a read outbound message, one
@@ -33,6 +42,16 @@ number; editable from the dashboard.
 the conversation so the conversation list never has to aggregate `messages`
 to render or sort.
 
+`last_customer_message_at` is the timestamp of the customer's most recent
+inbound message — set only by the RPC in `0006_customer_window_rpc.sql`,
+never by application code directly, and never by an outbound message or a
+redelivered webhook (see `docs/WEBHOOK.md`). `customer_window_expires_at` is
+a `generated always as (last_customer_message_at + interval '24 hours')
+stored` column — Postgres keeps it consistent by construction, so there's no
+"window started" timestamp to duplicate and no way for the two values to
+disagree. Neither column stores a status (`ACTIVE`/`EXPIRING`/`EXPIRED`):
+that's computed on read, see `docs/ARCHITECTURE.md`.
+
 **messages** — one row per WhatsApp message, inbound or outbound.
 `meta_message_id` is unique (nullable, since a message that failed to send
 before Meta ever returned an id has none) — this is the idempotency key for
@@ -44,10 +63,18 @@ payload for audit/debugging.
 
 **message_events** — an append-only audit trail:
 `WEBHOOK_RECEIVED | MESSAGE_CREATED | MESSAGE_SENT | MESSAGE_DELIVERED |
-MESSAGE_READ | MESSAGE_FAILED | CONTACT_CREATED | CONTACT_UPDATED`.
-`message_id` and `contact_id` are both nullable FKs (a `CONTACT_UPDATED`
-event from the dashboard's contact editor has no associated message) — at
-least conceptually one of them is set for any given event.
+MESSAGE_READ | MESSAGE_FAILED | CONTACT_CREATED | CONTACT_UPDATED |
+CUSTOMER_WINDOW_STARTED | CUSTOMER_WINDOW_RESET`. `message_id` and
+`contact_id` are both nullable FKs (a `CONTACT_UPDATED` event from the
+dashboard's contact editor has no associated message) — at least
+conceptually one of them is set for any given event. `CUSTOMER_WINDOW_STARTED`
+/ `_RESET` are logged by the same RPC that updates
+`last_customer_message_at`: `STARTED` the first time a conversation ever
+gets an inbound message, `RESET` every time after. There is no
+`CUSTOMER_WINDOW_EXPIRING` / `_EXPIRED` event — expiry is a continuous
+function of time, not a discrete occurrence, so there's no correct moment
+to log it without a background process (deliberately not built, see
+`docs/ARCHITECTURE.md`).
 
 ## Relationships
 
@@ -67,6 +94,9 @@ operators 1───* conversations (assigned_to, nullable)
 - `messages(meta_message_id)` and its `unique` constraint — webhook
   idempotency and status-update lookups.
 - `contacts(phone_number)` — contact find-or-create and search.
+- `conversations(customer_window_expires_at) where status = 'OPEN'` — the
+  Follow-ups live query (`docs/ARCHITECTURE.md`); partial because only open
+  conversations are ever relevant to it.
 
 ## Row Level Security
 
@@ -75,6 +105,11 @@ authenticated USING (true)` on `contacts`, `conversations`, `messages` and
 `message_events` — the tables the dashboard's Supabase Realtime
 subscriptions read directly from the browser (see `docs/ARCHITECTURE.md` for
 how a custom-auth login still produces a Supabase `authenticated` JWT).
+
+`last_customer_message_at` and `customer_window_expires_at` ride the
+existing `conversations` `SELECT` policy — no new policy was needed since
+no new table was added and the columns are never written by anything other
+than the service-role RPC.
 
 There are no `authenticated` `INSERT`/`UPDATE`/`DELETE` policies anywhere,
 and no policies at all on `operators` or `wa_accounts` (not even `SELECT`):

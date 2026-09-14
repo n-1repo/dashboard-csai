@@ -9,7 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ContactEditor } from "@/components/contacts/ContactEditor";
 import { getInitials } from "@/lib/format";
+import { useWindowStatus } from "@/hooks/useWindowStatus";
 import type { Contact, Conversation } from "@/types/database";
+
+const WINDOW_STATUS_LABEL: Record<"NONE" | "ACTIVE" | "EXPIRING" | "EXPIRED", string> = {
+  NONE: "-",
+  ACTIVE: "🟢 Active",
+  EXPIRING: "🟡 Expiring",
+  EXPIRED: "🔴 Expired",
+};
 
 const STATUS_OPTIONS: Conversation["status"][] = ["OPEN", "PENDING", "RESOLVED", "ARCHIVED"];
 
@@ -24,6 +32,7 @@ interface ContactPanelProps {
 export function ContactPanel({ open, onOpenChange, contact, conversation, onContactUpdated }: ContactPanelProps) {
   const [editing, setEditing] = useState(false);
   const name = contact.display_name || contact.profile_name || contact.phone_number;
+  const { status: windowStatus, remainingLabel } = useWindowStatus(conversation.customer_window_expires_at);
 
   async function handleStatusChange(status: Conversation["status"]) {
     await fetch(`/api/conversations/${conversation.id}`, {
@@ -89,6 +98,14 @@ export function ContactPanel({ open, onOpenChange, contact, conversation, onCont
                 <div className="text-xs text-muted-foreground">Dibuat</div>
                 <div className="text-sm text-foreground">
                   {new Date(contact.created_at).toLocaleDateString()}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-xs text-muted-foreground">Customer window status</div>
+                <div className="text-sm text-foreground">
+                  {WINDOW_STATUS_LABEL[windowStatus]}
+                  {windowStatus === "ACTIVE" || windowStatus === "EXPIRING" ? ` · ${remainingLabel} remaining` : ""}
                 </div>
               </div>
 

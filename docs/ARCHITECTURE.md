@@ -109,6 +109,41 @@ refreshes it periodically so long-lived dashboard tabs keep working.
 No component polls — every list re-renders purely from realtime events plus
 the one-time initial fetch.
 
+## Customer messaging window
+
+Meta only allows free-form outbound messages within 24 hours of the
+customer's last inbound message; after that, only approved templates can be
+sent. The dashboard tracks this as `conversations.last_customer_message_at`
+and a generated column `customer_window_expires_at` (`last_customer_message_at
++ interval '24 hours'`) — see `docs/DATABASE.md` for the schema and why it's
+only two columns.
+
+Status (`NONE | ACTIVE | EXPIRING | EXPIRED`) is never stored — it's derived
+from `customer_window_expires_at` vs. the current time by
+`lib/whatsapp/window-status.ts`'s `getWindowStatus`, called both server-side
+(if ever needed) and client-side via `hooks/useWindowStatus` (a 30s tick so
+the countdown moves without a reload, always recomputed from the same
+`customer_window_expires_at` value — a reload or switching conversations
+never resets it). `EXPIRING` is `remaining <= 4h`; `EXPIRED` is `remaining
+<= 0`. There is deliberately no `customer_window_reminders` table or cron
+job: the "Follow-ups" panel (`components/whatsapp/FollowUpCenter.tsx`) is a
+plain client-side filter over the same `conversations` array
+`hooks/useConversations` already keeps live via Realtime — a conversation's
+`customer_window_expires_at` changing is itself a `conversations` row
+update, which the existing subscription already re-fetches.
+
+Reset rule: only a genuinely new inbound message moves
+`last_customer_message_at` — never a redelivered webhook (duplicate
+`meta_message_id`) and never an outbound message. This is enforced by
+`lib/whatsapp/webhook-parser.ts`'s `shouldResetCustomerWindow(direction,
+isNewMessage)`, which gates the same RPC call already used for the unread
+counter (`increment_conversation_unread` in
+`supabase/migrations/0006_customer_window_rpc.sql`) — one atomic update, not
+a second query. An `EXPIRED` window blocks the composer's normal send flow
+in the UI (`components/whatsapp/MessageComposer.tsx`) in favor of a message
+pointing the operator at an approved template; `EXPIRING` only shows a
+warning.
+
 ## Media
 
 Meta's media URLs are short-lived and require the account's access token, so

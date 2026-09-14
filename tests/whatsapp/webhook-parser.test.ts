@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { extractMessageContent, mapMessageType, mapMetaStatus } from "@/lib/whatsapp/webhook-parser";
+import {
+  extractMessageContent,
+  mapMessageType,
+  mapMetaStatus,
+  shouldResetCustomerWindow,
+} from "@/lib/whatsapp/webhook-parser";
 import type { MetaMessage } from "@/types/whatsapp";
 
 describe("mapMessageType", () => {
@@ -69,5 +74,20 @@ describe("mapMetaStatus", () => {
     expect(mapMetaStatus("delivered")).toBe("DELIVERED");
     expect(mapMetaStatus("read")).toBe("READ");
     expect(mapMetaStatus("failed")).toBe("FAILED");
+  });
+});
+
+describe("shouldResetCustomerWindow", () => {
+  it("resets the window for a genuinely new inbound message", () => {
+    expect(shouldResetCustomerWindow("INBOUND", true)).toBe(true);
+  });
+
+  it("does not reset the window for a redelivered (duplicate) inbound message", () => {
+    expect(shouldResetCustomerWindow("INBOUND", false)).toBe(false);
+  });
+
+  it("never resets the window for an outbound message", () => {
+    expect(shouldResetCustomerWindow("OUTBOUND", true)).toBe(false);
+    expect(shouldResetCustomerWindow("OUTBOUND", false)).toBe(false);
   });
 });
