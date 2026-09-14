@@ -48,8 +48,12 @@ to render or sort.
 inbound message — set only by the RPC in `0006_customer_window_rpc.sql`,
 never by application code directly, and never by an outbound message or a
 redelivered webhook (see `docs/WEBHOOK.md`). `customer_window_expires_at` is
-a `generated always as (last_customer_message_at + interval '24 hours')
-stored` column — Postgres keeps it consistent by construction, so there's no
+a `generated always as (customer_window_expiry(last_customer_message_at))
+stored` column (`customer_window_expiry` is a tiny `immutable` SQL wrapper
+around `+ interval '24 hours'` — Postgres requires generated column
+expressions to be immutable, and the built-in `timestamptz + interval`
+operator is only marked `stable`) — Postgres keeps it consistent by
+construction, so there's no
 "window started" timestamp to duplicate and no way for the two values to
 disagree. Neither column stores a status (`ACTIVE`/`EXPIRING`/`EXPIRED`):
 that's computed on read, see `docs/ARCHITECTURE.md`.
