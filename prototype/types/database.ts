@@ -38,6 +38,8 @@ export type Conversation = {
   status: ConversationStatus;
   last_message_id: string | null;
   last_message_at: string | null;
+  last_customer_message_at: string | null;
+  customer_window_expires_at: string | null;
   unread_count: number;
   assigned_to: string | null;
   created_at: string;

@@ -45,6 +45,7 @@
   --status-delivered: #8696a0;
   --status-read: #53bdeb;
   --status-failed: #f15c6d;
+  --status-expiring: #eab308;
 }
 
 @theme inline {
@@ -86,6 +87,7 @@
   --color-status-delivered: var(--status-delivered);
   --color-status-read: var(--status-read);
   --color-status-failed: var(--status-failed);
+  --color-status-expiring: var(--status-expiring);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

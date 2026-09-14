@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getInitials } from "@/lib/format";
+import { useWindowStatus } from "@/hooks/useWindowStatus";
 import type { ConversationWithContact } from "@/types/database";
 
 interface ChatHeaderProps {
@@ -19,8 +20,15 @@ interface ChatHeaderProps {
   onBack?: () => void;
 }
 
+const WINDOW_LABEL: Record<"ACTIVE" | "EXPIRING" | "EXPIRED", string> = {
+  ACTIVE: "🟢",
+  EXPIRING: "🟡",
+  EXPIRED: "🔴",
+};
+
 export function ChatHeader({ conversation, onOpenContactPanel, onBack }: ChatHeaderProps) {
   const name = conversation.contact.display_name || conversation.contact.profile_name || conversation.contact.phone_number;
+  const { status: windowStatus, remainingLabel } = useWindowStatus(conversation.customer_window_expires_at);
 
   return (
     <div className="flex items-center justify-between border-b border-border bg-panel-raised px-4 py-2.5">
@@ -42,6 +50,12 @@ export function ChatHeader({ conversation, onOpenContactPanel, onBack }: ChatHea
           <div className="min-w-0">
             <div className="truncate font-medium text-foreground">{name}</div>
             <div className="truncate text-xs text-muted-foreground">{conversation.contact.phone_number}</div>
+            {windowStatus !== "NONE" ? (
+              <div className="truncate text-xs text-muted-foreground">
+                {WINDOW_LABEL[windowStatus]} Customer window ·{" "}
+                {windowStatus === "EXPIRED" ? "expired" : `${remainingLabel} remaining`}
+              </div>
+            ) : null}
           </div>
         </button>
       </div>

@@ -7,6 +7,11 @@ function iso(offsetMs: number) {
   return new Date(Date.now() - offsetMs).toISOString();
 }
 
+function windowExpiry(lastCustomerMessageAt: string | null) {
+  if (!lastCustomerMessageAt) return null;
+  return new Date(new Date(lastCustomerMessageAt).getTime() + 24 * HOUR).toISOString();
+}
+
 export const seedContacts: Contact[] = [
   {
     id: "contact-1",
@@ -83,6 +88,8 @@ export const seedConversations: Conversation[] = [
     status: "OPEN",
     last_message_id: "msg-1-4",
     last_message_at: iso(15 * 60 * 1000),
+    last_customer_message_at: iso(15 * 60 * 1000),
+    customer_window_expires_at: windowExpiry(iso(15 * 60 * 1000)),
     unread_count: 2,
     assigned_to: null,
     created_at: iso(60 * DAY),
@@ -95,6 +102,8 @@ export const seedConversations: Conversation[] = [
     status: "PENDING",
     last_message_id: "msg-2-3",
     last_message_at: iso(5 * HOUR),
+    last_customer_message_at: iso(6 * HOUR),
+    customer_window_expires_at: windowExpiry(iso(6 * HOUR)),
     unread_count: 0,
     assigned_to: null,
     created_at: iso(20 * DAY),
@@ -107,6 +116,8 @@ export const seedConversations: Conversation[] = [
     status: "OPEN",
     last_message_id: "msg-3-3",
     last_message_at: iso(DAY),
+    last_customer_message_at: iso(21 * HOUR),
+    customer_window_expires_at: windowExpiry(iso(21 * HOUR)),
     unread_count: 0,
     assigned_to: null,
     created_at: iso(90 * DAY),
@@ -119,6 +130,8 @@ export const seedConversations: Conversation[] = [
     status: "RESOLVED",
     last_message_id: "msg-4-2",
     last_message_at: iso(3 * DAY),
+    last_customer_message_at: iso(4 * DAY),
+    customer_window_expires_at: windowExpiry(iso(4 * DAY)),
     unread_count: 0,
     assigned_to: null,
     created_at: iso(10 * DAY),
@@ -131,6 +144,8 @@ export const seedConversations: Conversation[] = [
     status: "ARCHIVED",
     last_message_id: "msg-5-2",
     last_message_at: iso(7 * DAY),
+    last_customer_message_at: null,
+    customer_window_expires_at: null,
     unread_count: 1,
     assigned_to: null,
     created_at: iso(45 * DAY),

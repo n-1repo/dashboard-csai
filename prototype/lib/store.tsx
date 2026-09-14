@@ -4,6 +4,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 
 import type { Contact, Conversation, ConversationWithContact, Message } from "@/types/database";
 import { seedContacts, seedConversations, seedMessages } from "@/lib/seed";
+import type { ValidatedContactImportRow } from "@/lib/contacts-import";
+
+export type ContactImportMode = "SKIP_EXISTING" | "UPDATE_EXISTING";
+
+export interface ContactImportOutcome {
+  created: number;
+  updated: number;
+  skipped: number;
+}
 
 export interface OperatorSession {
   id: string;
@@ -44,6 +53,7 @@ interface StoreValue {
   updateContact: (id: string, patch: Partial<Contact>) => Contact | null;
   updateConversationStatus: (id: string, status: Conversation["status"]) => void;
   markConversationRead: (id: string) => void;
+  importContacts: (rows: ValidatedContactImportRow[], mode: ContactImportMode) => ContactImportOutcome;
   resetDemoData: () => void;
 }
 
@@ -172,6 +182,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         created_at: replyAt,
       };
 
+      const windowExpiresAt = new Date(new Date(replyAt).getTime() + 24 * 60 * 60 * 1000).toISOString();
+
       setState((prev) => ({
         ...prev,
         messages: { ...prev.messages, [conversationId]: [...(prev.messages[conversationId] ?? []), replyMessage] },
@@ -181,6 +193,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
                 ...c,
                 last_message_id: replyMessage.id,
                 last_message_at: replyAt,
+                last_customer_message_at: replyAt,
+                customer_window_expires_at: windowExpiresAt,
                 updated_at: replyAt,
                 unread_count: c.unread_count + 1,
               }
@@ -217,6 +231,57 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const importContacts = useCallback(
+    (rows: ValidatedContactImportRow[], mode: ContactImportMode): ContactImportOutcome => {
+      const outcome: ContactImportOutcome = { created: 0, updated: 0, skipped: 0 };
+      const existingByPhone = new Map(state.contacts.map((c) => [c.phone_number, c]));
+      let nextContacts = state.contacts;
+
+      for (const row of rows) {
+        const existing = existingByPhone.get(row.phone_number);
+
+        if (existing) {
+          if (mode === "UPDATE_EXISTING") {
+            const patch: Partial<Contact> = { display_name: row.display_name };
+            if (row.profile_name) patch.profile_name = row.profile_name;
+            if (row.email) patch.email = row.email;
+            if (row.notes) patch.notes = row.notes;
+            if (row.tagsProvided) patch.tags = row.tags;
+
+            const updated: Contact = { ...existing, ...patch, updated_at: new Date().toISOString() };
+            nextContacts = nextContacts.map((c) => (c.id === existing.id ? updated : c));
+            existingByPhone.set(row.phone_number, updated);
+            outcome.updated += 1;
+          } else {
+            outcome.skipped += 1;
+          }
+        } else {
+          const now = new Date().toISOString();
+          const created: Contact = {
+            id: crypto.randomUUID(),
+            phone_number: row.phone_number,
+            display_name: row.display_name,
+            profile_name: row.profile_name,
+            avatar_url: null,
+            email: row.email,
+            notes: row.notes,
+            tags: row.tags,
+            is_blocked: false,
+            created_at: now,
+            updated_at: now,
+          };
+          nextContacts = [...nextContacts, created];
+          existingByPhone.set(row.phone_number, created);
+          outcome.created += 1;
+        }
+      }
+
+      setState((prev) => ({ ...prev, contacts: nextContacts }));
+      return outcome;
+    },
+    [state.contacts],
+  );
+
   const resetDemoData = useCallback(() => {
     setState(seedState());
   }, []);
@@ -233,6 +298,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     updateContact,
     updateConversationStatus,
     markConversationRead,
+    importContacts,
     resetDemoData,
   };
 

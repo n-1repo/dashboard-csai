@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { useMessages } from "@/hooks/useMessages";
+import { useWindowStatus } from "@/hooks/useWindowStatus";
 import { ChatHeader } from "@/components/whatsapp/ChatHeader";
 import { MessageList } from "@/components/whatsapp/MessageList";
 import { MessageComposer } from "@/components/whatsapp/MessageComposer";
@@ -17,6 +18,7 @@ interface ChatWindowProps {
 
 export function ChatWindow({ conversation, onBack }: ChatWindowProps) {
   const { messages, loading, error } = useMessages(conversation.id);
+  const { status: windowStatus } = useWindowStatus(conversation.customer_window_expires_at);
   const { markConversationRead } = useStore();
   const [panelOpen, setPanelOpen] = useState(false);
   const [contact, setContact] = useState<Contact>(conversation.contact);
@@ -35,7 +37,7 @@ export function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         onBack={onBack}
       />
       <MessageList messages={messages} loading={loading} error={error} />
-      <MessageComposer conversationId={conversation.id} />
+      <MessageComposer conversationId={conversation.id} windowStatus={windowStatus} />
 
       <ContactPanel
         open={panelOpen}
