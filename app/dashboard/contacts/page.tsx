@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ContactDialog } from "@/components/contacts/ContactDialog";
+import { ImportContactsDialog } from "@/components/contacts/ImportContactsDialog";
 import { getInitials } from "@/lib/format";
 
 export default function ContactsPage() {
@@ -37,6 +38,7 @@ export default function ContactsPage() {
       <div className="flex h-full w-full flex-col">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h1 className="text-xl font-semibold text-foreground">Contacts</h1>
+          <ImportContactsDialog contacts={contacts} />
         </div>
 
         <div className="p-4">

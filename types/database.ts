@@ -111,6 +111,18 @@ export type MessageEvent = {
   created_at: string;
 };
 
+export type ContactImport = {
+  id: string;
+  filename: string;
+  total_rows: number;
+  created_count: number;
+  updated_count: number;
+  skipped_count: number;
+  invalid_count: number;
+  imported_by: string;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -174,6 +186,20 @@ export type Database = {
         Insert: Partial<MessageEvent> & Pick<MessageEvent, "event_type">;
         Update: Partial<MessageEvent>;
         Relationships: [];
+      };
+      contact_imports: {
+        Row: ContactImport;
+        Insert: Partial<ContactImport> & Pick<ContactImport, "filename" | "total_rows" | "imported_by">;
+        Update: Partial<ContactImport>;
+        Relationships: [
+          {
+            foreignKeyName: "contact_imports_imported_by_fkey";
+            columns: ["imported_by"];
+            isOneToOne: false;
+            referencedRelation: "operators";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: Record<string, never>;

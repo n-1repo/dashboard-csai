@@ -31,6 +31,11 @@ idempotency, and known scope cuts.
   computed from `conversations.customer_window_expires_at` at read time
   (`lib/whatsapp/window-status.ts`) — never stored as a column, never
   written by a background job. Don't add one; extend `getWindowStatus`.
+- Contact CSV import phone normalization (`lib/contacts/import.ts`'s
+  `normalizePhoneNumber`) must keep producing the exact same format
+  `lib/contacts/service.ts`'s `findOrCreateContact` stores from the webhook
+  path (digits only, `62` country code, no `+`) — a different format here
+  creates a second `contacts` row for a number that already exists.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

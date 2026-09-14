@@ -91,6 +91,59 @@ isNewMessage)`, gating the exact same call site that already gated
 create an inbound message (a different webhook field, a backfill script),
 route it through that same predicate — don't reimplement the gate.
 
+## Bulk contact import (CSV)
+
+`POST /api/contacts/import` — body `{ filename, csvText, columnMapping,
+mode }`. The browser (`components/contacts/ImportContactsDialog.tsx`) parses
+the file client-side too, purely for the upload/preview UX, but the server
+re-parses `csvText` from scratch with `papaparse` and never trusts the
+client's parsed rows — same "don't trust frontend validation" rule as
+everywhere else in this app. Both sides call the exact same pure functions
+in `lib/contacts/import.ts`, so the preview numbers and the server's final
+counts should always agree.
+
+Phone number format is the hard constraint: `normalizePhoneNumber` in
+`lib/contacts/import.ts` must produce the identical format
+`findOrCreateContact` (webhook path) already stores —
+digits-only, `62` country code, no `+` — or an imported contact and a
+webhook-created contact for the same real number end up as two different
+`contacts` rows. `08...` → `62...`, `+62...` → `62...`, already-`62...` is
+left alone; anything that isn't all-digits, doesn't start with `62`, or
+isn't 10-15 digits long is rejected as invalid rather than guessed at.
+
+Row cap is `CONTACT_IMPORT_ROW_CAP` (1000, in `lib/contacts/import.ts`),
+enforced both client-side (reject before upload) and server-side (hard
+reject even if a client somehow sent more) — this exists purely to keep the
+whole request well under any serverless platform's execution timeout, not
+as a data-quality rule.
+
+Two distinct duplicate concepts, two different resolutions:
+- **Same number twice in one file** — always resolved the same way,
+  regardless of any user choice: last occurrence in the file wins
+  (`dedupeContactImportRows`), reported as `duplicates_in_file`.
+- **Number already exists in `contacts`** — resolved by the user's chosen
+  `mode`: `SKIP_EXISTING` (default) leaves the existing row untouched;
+  `UPDATE_EXISTING` merges in the CSV's values.
+
+`UPDATE_EXISTING` merge semantics (`app/api/contacts/import/route.ts`):
+`display_name` is always overwritten (a row can't be valid without one).
+`profile_name` / `email` / `notes` only overwrite when the CSV cell for
+that row is non-empty — an empty cell leaves the existing value alone.
+`tags` is the one field that's an array, not a scalar, so it gets different
+semantics: an empty `tags` cell leaves the existing tags untouched, but a
+non-empty `tags` cell **replaces** the existing tags array entirely rather
+than merging/union-ing with it — deliberately, so that removing a tag from
+the CSV and re-importing actually removes it in the database. A union would
+never be able to delete a tag.
+
+Contact creation is one bulk `.insert()` call for every genuinely-new row;
+updates to existing contacts are sequential per-row `.update()` calls
+(Supabase has no bulk-update-with-per-row-different-values in one call) —
+this is fine because by the time we get there the existing-row set has
+already been separated out from the (larger, bulk-inserted) new-row set.
+There is no RPC/stored procedure for import — a plain service-role client
+in the Route Handler is enough.
+
 ## Where AI CS plugs in later
 
 Per `docs/ARCHITECTURE.md`, an AI layer is just another reader/writer of

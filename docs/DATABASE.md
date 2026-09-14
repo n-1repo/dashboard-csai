@@ -16,6 +16,8 @@ Schema lives in `supabase/migrations/`, applied in filename order:
 - `0006_customer_window_rpc.sql` — extends `increment_conversation_unread`
   (`create or replace`, same function) to also set
   `last_customer_message_at` and log the matching window event.
+- `0007_contact_imports.sql` — adds `contact_imports`, an audit record for
+  bulk CSV contact imports (`docs/IMPLEMENTATION_SPEC.md`).
 
 `supabase/seed.sql` is development-only sample data (contacts, conversations
 in different states, a failed outbound message, a read outbound message, one
@@ -76,6 +78,13 @@ function of time, not a discrete occurrence, so there's no correct moment
 to log it without a background process (deliberately not built, see
 `docs/ARCHITECTURE.md`).
 
+**contact_imports** — one row per CSV bulk-import run (audit only, not a
+processing queue): `filename`, `total_rows`, and the same
+created/updated/skipped/invalid counts the import API returns, plus
+`imported_by` (the logged-in operator, never client-supplied — see
+`docs/IMPLEMENTATION_SPEC.md` for the full CSV import contract). No raw CSV
+file is stored.
+
 ## Relationships
 
 ```
@@ -85,6 +94,7 @@ messages 1───* message_events
 contacts 1───* message_events
 conversations.last_message_id ──> messages.id
 operators 1───* conversations (assigned_to, nullable)
+operators 1───* contact_imports (imported_by)
 ```
 
 ## Indexes
@@ -101,10 +111,12 @@ operators 1───* conversations (assigned_to, nullable)
 ## Row Level Security
 
 RLS is enabled on every table. The only policies are `SELECT ... TO
-authenticated USING (true)` on `contacts`, `conversations`, `messages` and
-`message_events` — the tables the dashboard's Supabase Realtime
-subscriptions read directly from the browser (see `docs/ARCHITECTURE.md` for
-how a custom-auth login still produces a Supabase `authenticated` JWT).
+authenticated USING (true)` on `contacts`, `conversations`, `messages`,
+`message_events` and `contact_imports` — the same pattern every table gets
+(`docs/IMPLEMENTATION_SPEC.md`'s "Adding a new table" procedure), even
+though `contact_imports` isn't currently read by any Realtime subscription
+(it's audit-only, no history UI yet). See `docs/ARCHITECTURE.md` for how a
+custom-auth login still produces a Supabase `authenticated` JWT.
 
 `last_customer_message_at` and `customer_window_expires_at` ride the
 existing `conversations` `SELECT` policy — no new policy was needed since

@@ -2,11 +2,11 @@
 
 Internal dashboard that logs Meta WhatsApp Cloud API conversations into
 Supabase and exposes them through a WhatsApp-Web-style operator interface:
-conversation logger, chat history viewer, contact management, message status
-tracker, a realtime inbox, and a WhatsApp 24-hour customer messaging window
-tracker (live status, expiry warnings, a follow-up list). It is the base
-layer for a future AI Customer Service / CRM integration — no AI is
-implemented yet.
+conversation logger, chat history viewer, contact management (including
+bulk CSV import), message status tracker, a realtime inbox, and a WhatsApp
+24-hour customer messaging window tracker (live status, expiry warnings, a
+follow-up list). It is the base layer for a future AI Customer Service /
+CRM integration — no AI is implemented yet.
 
 ## Architecture
 
@@ -84,6 +84,21 @@ Open http://localhost:3000 — you will be redirected to `/login`.
 4. Copy the phone number ID, WABA ID and a permanent access token into the
    `wa_accounts` table (see above).
 
+## Bulk contact import
+
+Contacts page → **Import Contacts** → upload a CSV → map columns → preview
+→ confirm. Minimal columns: `phone_number`, `display_name` (both required).
+Optional: `profile_name`, `email`, `notes`, `tags` (comma-separated inside
+one cell, e.g. `"customer,prioritas"` — quote it if it contains a comma).
+Max 1000 rows per file. Phone numbers are normalized to the same format the
+webhook uses (`628123456789`, no `+`) so an imported contact and one
+created later by an inbound WhatsApp message from the same number never
+end up as two separate contacts. A number already in the database is
+skipped by default, or updated in place if you choose "Update existing"
+(empty CSV cells never overwrite existing values, except `tags`: a
+non-empty `tags` cell replaces the contact's tags entirely). See
+`docs/IMPLEMENTATION_SPEC.md` for the full contract.
+
 ## Development
 
 ```bash
@@ -114,3 +129,7 @@ See `prototype/README.md` for details.
   status on the conversation list, chat header, contact panel and composer,
   plus a Follow-ups panel for conversations about to expire. See
   `docs/ARCHITECTURE.md` and `docs/DATABASE.md`.
+- **0.4.0** — Added bulk CSV contact import (Contacts page → Import
+  Contacts): drag & drop, column mapping, preview/validation, skip/update
+  existing, an audit table (`contact_imports`). See
+  `docs/IMPLEMENTATION_SPEC.md`.
