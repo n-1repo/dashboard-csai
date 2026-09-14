@@ -5,7 +5,7 @@ flows on GitHub Pages, without Supabase, Meta API credentials, or any
 server. Lives in its own `prototype/` folder so it never touches the real
 app in the repo root.
 
-Site sekarang live di **https://n-1repo.github.io/dashboard-csai/**
+Now live at **https://n-1repo.github.io/dashboard-csai/**
 
 ## What's different from the real app
 
