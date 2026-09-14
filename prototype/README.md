@@ -5,6 +5,8 @@ flows on GitHub Pages, without Supabase, Meta API credentials, or any
 server. Lives in its own `prototype/` folder so it never touches the real
 app in the repo root.
 
+Site sekarang live di **https://n-1repo.github.io/dashboard-csai/**
+
 ## What's different from the real app
 
 - No Supabase, no Route Handlers, no Meta WhatsApp Cloud API calls.
@@ -32,3 +34,10 @@ NEXT_BASE_PATH=/dashboard-csai npm run build
 Output goes to `out/`. `.github/workflows/deploy-prototype.yml` builds and
 publishes this folder to GitHub Pages on every push to `main` that touches
 `prototype/`.
+
+## Version log
+
+- **0.1.0** (2026-09-14) — Initial prototype: login, chat list, send/receive
+  messages with a simulated auto-reply, contacts CRUD, settings with a
+  reset-demo-data button. All state in `localStorage`, seeded on first load.
+  Deployed to GitHub Pages via `deploy-prototype.yml`.
