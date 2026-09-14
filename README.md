@@ -96,3 +96,15 @@ npm test
 Deploy the Next.js app to Vercel as usual (`vercel deploy` or Git
 integration). Set all the environment variables above in the Vercel project
 settings. Point Meta's webhook at the deployed `APP_URL`.
+
+A static, backend-free prototype of the dashboard (mock data, no Supabase or
+Meta API needed) is now live at **https://n-1repo.github.io/dashboard-csai/**.
+See `prototype/README.md` for details.
+
+## Version log
+
+- **0.1.0** — Initial MVP: WhatsApp Cloud API dashboard on Supabase
+  (webhook ingestion, realtime inbox, contacts, message status tracking).
+- **0.1.1** — Added CI workflow to run `npm run build` on push/PR.
+- **0.2.0** — Added a static prototype (`prototype/`) deployable to GitHub
+  Pages, with its own GitHub Actions workflow.
